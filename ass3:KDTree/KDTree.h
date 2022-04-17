@@ -116,6 +116,7 @@ public:
 private:
     void freetree(kdtree<N,ElemType>* );
     kdtree<N,ElemType>* copy(kdtree<N,ElemType>* other);
+    kdtree<N,ElemType>* clone(kdtree<N,ElemType>* other);
     kdtree<N,ElemType>* findnode(const Point<N>& pt) const;
     void kNNHelper(BoundedPQueue<ElemType>& bpq,const Point<N>& key,const kdtree<N,ElemType>* node,int level) const;
     struct kdtree<N,ElemType>* root;
@@ -323,7 +324,7 @@ kdtree<N,ElemType>* KDTree<N, ElemType>::copy(kdtree<N,ElemType>* other){
 template<size_t N,typename ElemType>
 KDTree<N, ElemType>::KDTree(KDTree&& other){
     _size=other._size;
-    root=copy(other.root);
+    root=clone(other.root);
 }
 
 template<size_t N,typename ElemType>
@@ -332,9 +333,20 @@ KDTree<N,ElemType>& KDTree<N, ElemType>::operator=(KDTree&& rhs){
         return *this;
     }
     freetree(this->root);
-    this->root=copy(rhs.root);
+    this->root=clone(rhs.root);
     this->_size=rhs._size;
     return *this;
 }
 
+template<size_t N,typename ElemType>
+kdtree<N,ElemType>* KDTree<N, ElemType>::clone(kdtree<N,ElemType>* other){
+    if(other ==nullptr){
+        return nullptr;
+    }
+    kdtree<N,ElemType>* node = other;
+    node->left=clone(other->left);
+    node->right=clone(other->right);
+    other=nullptr;
+    return node;
+}
 #endif // KDTREE_INCLUDED
